@@ -1,43 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+// import * as Location from 'expo-location'; // Not needed for demo mode
+// import axios from 'axios'; // Not needed for demo mode
+// import { io, Socket } from 'socket.io-client'; // Not needed for demo mode
 import { GlassCard } from '../components/GlassCard';
 import { GlowButton } from '../components/GlowButton';
 import { Colors } from '../constants/Colors';
+// import { BACKEND_URL } from '../config/constants'; // Not needed for demo mode
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
+type ActiveWalkScreenRouteProp = RouteProp<RootStackParamList, 'ActiveWalk'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export function ActiveWalkScreen() {
+  const route = useRoute<ActiveWalkScreenRouteProp>();
   const navigation = useNavigation<NavigationProp>();
+  const sessionId = route.params?.sessionId;
+  const shareUrl = route.params?.shareUrl;
+
+  // Location and session state
+  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [eta, setEta] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
+  const [inactivityAlert, setInactivityAlert] = useState(false);
+  const [isLocationTracking, setIsLocationTracking] = useState(false);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => navigation.navigate('Arrival'), 500);
-          return 100;
-        }
-        return prev + 2;
-      });
-    }, 200);
-
-    const alertTimer = setTimeout(() => {
-      setShowAlert(true);
-    }, 3000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(alertTimer);
-    };
-  }, []);
+  // Refs for cleanup
+  const locationWatchRef = useRef<any>(null); // DEMO: Simplified type
+  const locationUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const rotation = useSharedValue(0);
   useEffect(() => {
@@ -48,10 +45,135 @@ export function ActiveWalkScreen() {
     transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
-  const companions = [
-    { name: 'Mom', status: 'watching', avatar: '👩' },
-    { name: 'Sarah', status: 'watching', avatar: '👱‍♀️' },
-  ];
+  /**
+   * Initialize location tracking - DEMO MODE: Hardcoded, no backend required
+   */
+  useEffect(() => {
+    if (!sessionId) {
+      Alert.alert('Error', 'No session ID provided');
+      navigation.goBack();
+      return;
+    }
+
+    // DEMO: Start simulated location tracking (no backend needed)
+    startLocationTracking();
+
+    // Cleanup on unmount
+    return () => {
+      if (locationWatchRef.current) {
+        locationWatchRef.current.remove();
+      }
+      if (locationUpdateIntervalRef.current) {
+        clearInterval(locationUpdateIntervalRef.current);
+      }
+    };
+  }, [sessionId]);
+
+  /**
+   * Start tracking user location - DEMO MODE: Simulated location updates
+   */
+  const startLocationTracking = async () => {
+    // DEMO: Use hardcoded start location (Bagley Hall)
+    const demoStartLocation = {
+      lat: 47.6553,
+      lng: -122.3035,
+    };
+
+    setCurrentLocation(demoStartLocation);
+    setIsLocationTracking(true);
+    
+    // DEMO: Simulate ETA calculation
+    const now = new Date();
+    const etaTime = new Date(now.getTime() + 6 * 60000); // 6 minutes from now
+    setEta(etaTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }));
+
+    // DEMO: Simulate location movement (gradually move towards destination)
+    let currentLat = demoStartLocation.lat;
+    let currentLng = demoStartLocation.lng;
+    const endLat = 47.6600;
+    const endLng = -122.3100;
+    
+    locationUpdateIntervalRef.current = setInterval(() => {
+      // Simulate movement towards destination
+      const latDiff = endLat - currentLat;
+      const lngDiff = endLng - currentLng;
+      
+      // Move 1% closer each update
+      currentLat += latDiff * 0.01;
+      currentLng += lngDiff * 0.01;
+      
+      setCurrentLocation({ lat: currentLat, lng: currentLng });
+      
+      // Update progress
+      const distanceTraveled = Math.sqrt(
+        Math.pow(currentLat - demoStartLocation.lat, 2) + 
+        Math.pow(currentLng - demoStartLocation.lng, 2)
+      );
+      const totalDistance = Math.sqrt(
+        Math.pow(endLat - demoStartLocation.lat, 2) + 
+        Math.pow(endLng - demoStartLocation.lng, 2)
+      );
+      const progressPercent = Math.min(100, (distanceTraveled / totalDistance) * 100);
+      setProgress(progressPercent);
+    }, 2000); // Update every 2 seconds for demo
+  };
+
+  // DEMO: Location updates are simulated, no backend call needed
+
+  /**
+   * Trigger panic/SOS - DEMO MODE: No backend call needed
+   */
+  const handlePanic = async () => {
+    if (!sessionId) return;
+
+    Alert.alert(
+      'Trigger SOS?',
+      'This will alert your companion and emergency contacts.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Yes, SOS',
+          style: 'destructive',
+          onPress: () => {
+            // DEMO: Just show alert, no backend call
+            Alert.alert('SOS Triggered', 'Your emergency contacts have been notified.');
+          },
+        },
+      ]
+    );
+  };
+
+  /**
+   * Mark arrival - DEMO MODE: No backend call needed
+   */
+  const handleArrive = async () => {
+    if (!sessionId) return;
+
+    // Stop location tracking
+    if (locationWatchRef.current) {
+      locationWatchRef.current.remove();
+      locationWatchRef.current = null;
+    }
+    if (locationUpdateIntervalRef.current) {
+      clearInterval(locationUpdateIntervalRef.current);
+      locationUpdateIntervalRef.current = null;
+    }
+
+    // DEMO: Navigate directly to arrival screen, no backend call
+    navigation.navigate('Arrival', { sessionId });
+  };
+
+  // Show loading state while initializing
+  if (!sessionId) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.centerContent}>
+          <ActivityIndicator size="large" color={Colors.safeGreen} />
+          <Text style={styles.loadingText}>Initializing walk...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -71,26 +193,58 @@ export function ActiveWalkScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Inactivity Alert Banner */}
+        {inactivityAlert && (
+          <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.inactivityBanner}>
+            <GlassCard glow="caution">
+              <View style={styles.alertContent}>
+                <View style={styles.alertIcon}>
+                  <Ionicons name="time-outline" size={20} color={Colors.cautionYellow} />
+                </View>
+                <View style={styles.alertText}>
+                  <Text style={styles.alertTitle}>Inactivity Detected</Text>
+                  <Text style={styles.alertDescription}>
+                    You haven't updated your location recently. Your companions have been notified.
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => setInactivityAlert(false)}>
+                  <Ionicons name="close" size={16} color="rgba(255, 255, 255, 0.4)" />
+                </TouchableOpacity>
+              </View>
+            </GlassCard>
+          </Animated.View>
+        )}
+
         <GlassCard glow="safe" style={styles.progressCard}>
           <View style={styles.progressHeader}>
             <Animated.View style={[styles.navIcon, animatedStyle]}>
               <Ionicons name="navigate-outline" size={24} color={Colors.safeGreen} />
             </Animated.View>
             <View style={styles.progressInfo}>
-              <Text style={styles.routeName}>Campus Loop Route</Text>
-              <Text style={styles.timeRemaining}>4 min remaining</Text>
+              <Text style={styles.routeName}>Bagley Hall → The Standard</Text>
+              {eta ? (
+                <Text style={styles.timeRemaining}>ETA: {eta}</Text>
+              ) : (
+                <Text style={styles.timeRemaining}>Tracking location...</Text>
+              )}
             </View>
           </View>
 
-          <View style={styles.progressBarContainer}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${progress}%` }]} />
+          {currentLocation && (
+            <View style={styles.locationInfo}>
+              <Text style={styles.locationLabel}>Current Location</Text>
+              <Text style={styles.locationText}>
+                {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
+              </Text>
             </View>
-            <View style={styles.progressLabels}>
-              <Text style={styles.progressLabel}>0.4 mi walked</Text>
-              <Text style={styles.progressLabel}>0.2 mi left</Text>
+          )}
+
+          {!isLocationTracking && (
+            <View style={styles.trackingStatus}>
+              <ActivityIndicator size="small" color={Colors.cautionYellow} />
+              <Text style={styles.trackingText}>Starting location tracking...</Text>
             </View>
-          </View>
+          )}
         </GlassCard>
 
         {showAlert && (
@@ -98,7 +252,7 @@ export function ActiveWalkScreen() {
             <GlassCard glow="caution">
               <View style={styles.alertContent}>
                 <View style={styles.alertIcon}>
-                    <Ionicons name="warning-outline" size={20} color={Colors.cautionYellow} />
+                  <Ionicons name="warning-outline" size={20} color={Colors.cautionYellow} />
                 </View>
                 <View style={styles.alertText}>
                   <Text style={styles.alertTitle}>Low Light Area Ahead</Text>
@@ -114,28 +268,23 @@ export function ActiveWalkScreen() {
           </Animated.View>
         )}
 
-        <GlassCard style={styles.companionsCard}>
-          <View style={styles.companionsHeader}>
-            <Ionicons name="people-outline" size={16} color={Colors.purpleGradient[0]} />
-            <Text style={styles.companionsTitle}>Live Companions</Text>
-          </View>
-          <View style={styles.companionsList}>
-            {companions.map((companion, i) => (
-              <View key={i} style={styles.companionItem}>
-                <Text style={styles.companionAvatar}>{companion.avatar}</Text>
-                <View style={styles.companionInfo}>
-                  <Text style={styles.companionName}>{companion.name}</Text>
-                  <View style={styles.watchingDot} />
-                </View>
-              </View>
-            ))}
-          </View>
-        </GlassCard>
+        {shareUrl && (
+          <GlassCard style={styles.shareCard}>
+            <View style={styles.shareHeader}>
+              <Ionicons name="people-outline" size={16} color={Colors.purpleGradient[0]} />
+              <Text style={styles.shareTitle}>Share with Companion</Text>
+            </View>
+            <Text style={styles.shareUrl} numberOfLines={1}>
+              {shareUrl}
+            </Text>
+            <Text style={styles.shareHint}>Share this link for real-time tracking</Text>
+          </GlassCard>
+        )}
 
         <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Ionicons name="call-outline" size={24} color={Colors.dangerRed} />
-            <Text style={styles.actionLabel}>Emergency</Text>
+          <TouchableOpacity style={styles.actionButton} onPress={handlePanic}>
+            <Ionicons name="warning" size={24} color={Colors.dangerRed} />
+            <Text style={styles.actionLabel}>SOS</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton}>
             <Ionicons name="chatbubble-outline" size={24} color={Colors.blueGradient[0]} />
@@ -148,7 +297,7 @@ export function ActiveWalkScreen() {
         </View>
 
         <GlowButton
-          onPress={() => navigation.navigate('Arrival')}
+          onPress={handleArrive}
           variant="primary"
           size="lg"
           style={styles.endButton}
@@ -169,6 +318,16 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 60,
     paddingHorizontal: 24,
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  loadingText: {
+    color: Colors.textSecondary,
+    fontSize: 16,
   },
   header: {
     flexDirection: 'row',
@@ -234,27 +393,39 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: 4,
   },
-  progressBarContainer: {
-    marginTop: 8,
+  locationInfo: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
-  progressBar: {
-    height: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 4,
-    overflow: 'hidden',
+  locationLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+    marginBottom: 8,
+    textTransform: 'uppercase',
   },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.safeGreen,
+  locationText: {
+    fontSize: 14,
+    fontFamily: 'monospace',
+    color: Colors.textPrimary,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    padding: 12,
+    borderRadius: 8,
   },
-  progressLabels: {
+  trackingStatus: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
   },
-  progressLabel: {
+  trackingText: {
     fontSize: 12,
     color: Colors.textSecondary,
+  },
+  inactivityBanner: {
+    marginBottom: 16,
   },
   alertCard: {
     marginBottom: 16,
@@ -285,51 +456,32 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textSecondary,
   },
-  companionsCard: {
+  shareCard: {
     marginBottom: 16,
   },
-  companionsHeader: {
+  shareHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     marginBottom: 12,
   },
-  companionsTitle: {
+  shareTitle: {
     color: 'rgba(255, 255, 255, 0.8)',
     fontSize: 14,
     fontWeight: '600',
   },
-  companionsList: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  companionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  companionAvatar: {
-    fontSize: 20,
-  },
-  companionInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  companionName: {
-    color: Colors.textPrimary,
+  shareUrl: {
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: 'monospace',
+    color: Colors.textPrimary,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
   },
-  watchingDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.safeGreen,
+  shareHint: {
+    fontSize: 12,
+    color: Colors.textTertiary,
   },
   quickActions: {
     flexDirection: 'row',
@@ -354,4 +506,3 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
 });
-

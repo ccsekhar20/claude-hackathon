@@ -6,6 +6,7 @@ A React Native mobile app converted from the Next.js web application. SafeWalk A
 
 - 🛡️ **AI-Powered Safety Analysis** - Real-time route safety scoring
 - 🗺️ **Smart Route Planning** - Compare multiple routes with detailed safety metrics
+- 📍 **Location Autocomplete** - Google Maps-style location search with dropdown suggestions
 - 👥 **Live Companion Tracking** - Share your location with trusted contacts
 - ⚠️ **Hazard Alerts** - Get notified about potential dangers
 - 📱 **Native Mobile Experience** - Built with React Native and Expo
@@ -19,6 +20,7 @@ A React Native mobile app converted from the Next.js web application. SafeWalk A
 - **React Native Reanimated** - Smooth animations
 - **Expo Blur** - Glassmorphism effects
 - **Expo Linear Gradient** - Gradient backgrounds
+- **Google Places API** - Location autocomplete and search
 
 ## Getting Started
 
@@ -36,7 +38,18 @@ A React Native mobile app converted from the Next.js web application. SafeWalk A
 npm install
 ```
 
-2. Start the development server:
+2. Set up Google Places API (for location autocomplete):
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select an existing one
+   - Enable "Places API" in APIs & Services
+   - Create an API key in APIs & Services > Credentials
+   - Create a `.env` file in the root directory:
+     ```bash
+     EXPO_PUBLIC_GOOGLE_PLACES_API_KEY=your_api_key_here
+     ```
+   - **Note**: The app works with mock data if no API key is provided (for development/testing)
+
+3. Start the development server:
 ```bash
 npm start
 ```
@@ -66,7 +79,8 @@ expo build:android
 │   ├── components/         # Reusable components
 │   │   ├── GlassCard.tsx
 │   │   ├── GlowButton.tsx
-│   │   └── SafetyIndicator.tsx
+│   │   ├── SafetyIndicator.tsx
+│   │   └── LocationAutocomplete.tsx
 │   ├── screens/            # Screen components
 │   │   ├── OnboardingScreen.tsx
 │   │   ├── HomeScreen.tsx
@@ -79,6 +93,8 @@ expo build:android
 │   │   └── AppNavigator.tsx
 │   ├── constants/          # Constants and config
 │   │   └── Colors.ts
+│   ├── config/             # Configuration files
+│   │   └── constants.ts    # API keys and config
 │   └── lib/                # Utilities
 │       └── utils.ts
 ├── app.json                # Expo configuration
@@ -88,7 +104,7 @@ expo build:android
 ## Screens
 
 1. **Onboarding** - Welcome screens introducing app features
-2. **Home** - Main screen with route input and recent routes
+2. **Home** - Main screen with location autocomplete search and recent routes
 3. **Routes** - Compare multiple route options with safety scores
 4. **Active Walk** - Live tracking screen with progress and alerts
 5. **Arrival** - Success screen with walk summary

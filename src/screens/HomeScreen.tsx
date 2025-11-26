@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { GlassCard } from '../components/GlassCard';
 import { GlowButton } from '../components/GlowButton';
+import { LocationAutocomplete } from '../components/LocationAutocomplete';
 import { Colors } from '../constants/Colors';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -19,6 +21,7 @@ interface RecentRoute {
 }
 
 const recentRoutes: RecentRoute[] = [
+  { from: 'Bagley Hall', to: 'The Standard at Seattle', time: '6 min', safety: 94 },
   { from: 'Suzzallo Library', to: 'McMahon Hall', time: '8 min', safety: 92 },
   { from: 'Allen Library', to: 'The Ave', time: '12 min', safety: 87 },
 ];
@@ -27,6 +30,66 @@ export function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
+  const [fromPlaceId, setFromPlaceId] = useState<string | null>(null);
+  const [toPlaceId, setToPlaceId] = useState<string | null>(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
+  const getCurrentLocation = async () => {
+    setIsGettingLocation(true);
+    try {
+      // Request permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Denied',
+          'Location permission is required to use this feature.'
+        );
+        setIsGettingLocation(false);
+        return;
+      }
+
+      // Get current location
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      // Reverse geocode to get address
+      const geocode = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      if (geocode.length > 0) {
+        const address = geocode[0];
+        // Format address
+        const addressParts = [
+          address.streetNumber,
+          address.street,
+          address.district || address.subAdministrativeArea,
+        ].filter(Boolean);
+        
+        const locationName = addressParts.length > 0
+          ? addressParts.join(' ')
+          : address.name || address.formattedAddress || 'Current Location';
+        
+        setFrom(locationName);
+        setFromPlaceId(`current_${location.coords.latitude}_${location.coords.longitude}`);
+        // Store location for autocomplete bias
+        setUserLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+      } else {
+        setFrom('Current Location');
+      }
+    } catch (error) {
+      console.error('Error getting location:', error);
+      Alert.alert('Error', 'Failed to get your current location. Please try again.');
+    } finally {
+      setIsGettingLocation(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -43,32 +106,62 @@ export function HomeScreen() {
         </TouchableOpacity>
       </Animated.View>
 
-      <GlassCard style={styles.routeCard}>
-        <View style={styles.inputContainer}>
-          <View style={styles.iconCircle}>
-            <View style={styles.greenDot} />
-          </View>
-          <TextInput
-            style={styles.input}
-            placeholder="Current location"
-            placeholderTextColor="rgba(255, 255, 255, 0.4)"
-            value={from}
-            onChangeText={setFrom}
-          />
-        </View>
+      <View style={styles.routeCardWrapper}>
+        <GlassCard style={styles.routeCard}>
+          <View style={styles.inputSection}>
+            <View style={styles.autocompleteRow}>
+              <View style={styles.autocompleteWrapper}>
+                <LocationAutocomplete
+                  placeholder="Current location"
+                  value={from}
+                  onChangeText={setFrom}
+                  onSelectLocation={(location) => {
+                    setFrom(location.name);
+                    setFromPlaceId(location.placeId);
+                  }}
+                  showValidation={true}
+                  userLocation={userLocation}
+                  icon={
+                    <View style={styles.iconCircle}>
+                      <View style={styles.greenDot} />
+                    </View>
+                  }
+                />
+              </View>
+              <TouchableOpacity
+                onPress={getCurrentLocation}
+                disabled={isGettingLocation}
+                style={styles.locationButton}
+              >
+                {isGettingLocation ? (
+                  <ActivityIndicator size="small" color={Colors.safeGreen} />
+                ) : (
+                  <Ionicons name="locate" size={20} color={Colors.safeGreen} />
+                )}
+              </TouchableOpacity>
+            </View>
 
-        <View style={[styles.inputContainer, { marginTop: 16 }]}>
-          <View style={[styles.iconCircle, { backgroundColor: 'rgba(59, 130, 246, 0.2)' }]}>
-            <Ionicons name="location-outline" size={20} color={Colors.blueGradient[0]} />
+            <View style={styles.autocompleteRow}>
+              <View style={styles.autocompleteWrapper}>
+                <LocationAutocomplete
+                  placeholder="Where to?"
+                  value={to}
+                  onChangeText={setTo}
+                  onSelectLocation={(location) => {
+                    setTo(location.name);
+                    setToPlaceId(location.placeId);
+                  }}
+                  showValidation={true}
+                  userLocation={userLocation}
+                  icon={
+                    <View style={[styles.iconCircle, { backgroundColor: 'rgba(59, 130, 246, 0.2)' }]}>
+                      <Ionicons name="location-outline" size={20} color={Colors.blueGradient[0]} />
+                    </View>
+                  }
+                />
+              </View>
+            </View>
           </View>
-          <TextInput
-            style={styles.input}
-            placeholder="Where to?"
-            placeholderTextColor="rgba(255, 255, 255, 0.4)"
-            value={to}
-            onChangeText={setTo}
-          />
-        </View>
 
         <GlowButton
           onPress={() => navigation.navigate('Routes')}
@@ -78,7 +171,8 @@ export function HomeScreen() {
         >
           Find Safe Routes
         </GlowButton>
-      </GlassCard>
+        </GlassCard>
+      </View>
 
       <ScrollView style={styles.recentRoutes} showsVerticalScrollIndicator={false}>
         <View style={styles.recentHeader}>
@@ -144,8 +238,47 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  routeCard: {
+  routeCardWrapper: {
     marginBottom: 24,
+    zIndex: 1,
+    position: 'relative' as any,
+  },
+  routeCard: {
+    overflow: 'visible' as any,
+    padding: 20,
+    position: 'relative' as any,
+  },
+  inputSection: {
+    gap: 16,
+  },
+  autocompleteRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    width: '100%',
+  },
+  autocompleteWrapper: {
+    flex: 1,
+    zIndex: 10,
+    position: 'relative' as any,
+    overflow: 'visible' as any,
+    minWidth: 0,
+  },
+  locationButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(52, 211, 153, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(52, 211, 153, 0.3)',
+    marginTop: 0,
+    shadowColor: Colors.safeGreen,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   inputContainer: {
     flexDirection: 'row',

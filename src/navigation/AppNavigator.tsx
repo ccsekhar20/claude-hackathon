@@ -15,8 +15,8 @@ export type RootStackParamList = {
   Onboarding: undefined;
   Home: undefined;
   Routes: undefined;
-  ActiveWalk: undefined;
-  Arrival: undefined;
+  ActiveWalk: { sessionId: string; shareUrl?: string };
+  Arrival: { sessionId: string };
   Report: undefined;
   Settings: undefined;
   StartWalk: undefined;

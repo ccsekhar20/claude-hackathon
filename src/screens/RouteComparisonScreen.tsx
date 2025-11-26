@@ -27,14 +27,14 @@ interface Route {
 const routes: Route[] = [
   {
     id: 1,
-    name: 'Campus Loop Route',
-    safety: 92,
+    name: 'Bagley Hall → The Standard',
+    safety: 94,
     safetyLevel: 'safe',
-    duration: '8 min',
-    distance: '0.6 mi',
-    lighting: 95,
-    crowdDensity: 78,
-    highlights: ['Well-lit pathways', 'Emergency stations nearby', 'High foot traffic'],
+    duration: '6 min',
+    distance: '0.4 mi',
+    lighting: 98,
+    crowdDensity: 85,
+    highlights: ['Well-lit pathways', 'Emergency stations nearby', 'High foot traffic', 'Shortest route'],
   },
   {
     id: 2,
@@ -134,7 +134,7 @@ export function RouteComparisonScreen() {
 
               {i === 0 && (
                 <GlowButton
-                  onPress={() => navigation.navigate('ActiveWalk')}
+                  onPress={() => navigation.navigate('StartWalk')}
                   variant="primary"
                   size="md"
                   style={styles.startButton}

@@ -1,19 +1,46 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+// import axios from 'axios'; // Not needed for demo mode
 import { GlassCard } from '../components/GlassCard';
 import { GlowButton } from '../components/GlowButton';
 import { Colors } from '../constants/Colors';
+// import { BACKEND_URL } from '../config/constants'; // Not needed for demo mode
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
+type ArrivalScreenRouteProp = RouteProp<RootStackParamList, 'Arrival'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export function ArrivalScreen() {
+  const route = useRoute<ArrivalScreenRouteProp>();
   const navigation = useNavigation<NavigationProp>();
+  const sessionId = route.params?.sessionId;
+  const [isMarkingArrival, setIsMarkingArrival] = useState(false);
+  const [arrivalMarked, setArrivalMarked] = useState(false);
+
+  /**
+   * DEMO MODE: Skip backend call, just show arrival screen
+   */
+  useEffect(() => {
+    // DEMO: Mark as arrived immediately, no backend call needed
+    setArrivalMarked(true);
+  }, [sessionId]);
+
+  if (isMarkingArrival) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.centerContent}>
+          <ActivityIndicator size="large" color={Colors.safeGreen} />
+          <Text style={styles.loadingText}>Marking arrival...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -37,6 +64,7 @@ export function ArrivalScreen() {
           <Text style={styles.title}>You Arrived Safely!</Text>
           <Text style={styles.subtitle}>
             Your companions have been notified of your safe arrival.
+            {arrivalMarked && ' Auto-notify has been sent to your contacts.'}
           </Text>
         </Animated.View>
 
@@ -208,6 +236,16 @@ const styles = StyleSheet.create({
   funStatHighlight: {
     color: Colors.safeGreen,
     fontWeight: '600',
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  loadingText: {
+    color: Colors.textSecondary,
+    fontSize: 16,
   },
 });
 

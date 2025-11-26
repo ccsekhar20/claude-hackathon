@@ -50,7 +50,7 @@ cp .env.example .env
 python run.py
 ```
 
-The server will start on `http://localhost:5001` (or the port specified in `.env`).
+The server will start on `http://localhost:5000` (or the port specified in `.env`).
 
 ## API Endpoints
 
@@ -112,7 +112,7 @@ Health check endpoint.
 
 **Example:**
 ```bash
-curl -X POST http://localhost:5001/api/sessions \
+curl -X POST http://localhost:5000/api/sessions \
   -H "Content-Type: application/json" \
   -d '{
     "userName": "Agastya",
@@ -142,7 +142,7 @@ curl -X POST http://localhost:5001/api/sessions \
 
 **Example:**
 ```bash
-curl http://localhost:5001/api/sessions/share/abc123def4
+curl http://localhost:5000/api/sessions/share/abc123def4
 ```
 
 **Response:**

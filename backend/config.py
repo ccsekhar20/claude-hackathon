@@ -29,7 +29,7 @@ UW_CALLBOXES_GEOJSON_PATH = os.getenv("UW_CALLBOXES_GEOJSON_PATH", "")
 # Flask Configuration
 FLASK_ENV = os.getenv("FLASK_ENV", "development")
 FLASK_DEBUG = os.getenv("FLASK_DEBUG", "True").lower() == "true"
-FLASK_PORT = int(os.getenv("FLASK_PORT", "5001"))
+FLASK_PORT = int(os.getenv("FLASK_PORT", "5000"))  # Default to 5000 to match frontend
 
 # CORS Configuration
 CORS_ORIGINS = os.getenv(
