@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "SafeWalk AI",
+    "slug": "safewalk-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f0f23"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.safewalk.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "SafeWalk needs your location to provide safe route recommendations and real-time tracking.",
+        "NSLocationAlwaysUsageDescription": "SafeWalk needs your location to provide safe route recommendations and real-time tracking."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f0f23"
+      },
+      "package": "com.safewalk.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow SafeWalk to use your location to provide safe route recommendations."
+        }
+      ]
+    ]
+  }
+}
+
