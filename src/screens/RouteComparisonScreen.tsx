@@ -85,7 +85,7 @@ export function RouteComparisonScreen() {
             <GlassCard glow={i === 0 ? 'safe' : 'none'} animate={false}>
               {i === 0 && (
                 <View style={styles.recommendedBadge}>
-                  <Ionicons name="shield" size={16} color={Colors.safeGreen} />
+                  <Ionicons name="shield-outline" size={16} color={Colors.safeGreen} />
                   <Text style={styles.recommendedText}>Recommended</Text>
                 </View>
               )}

@@ -29,7 +29,7 @@ export function ArrivalScreen() {
             colors={Colors.emeraldGradient}
             style={styles.iconGradient}
           >
-            <Ionicons name="checkmark-circle" size={64} color="#ffffff" />
+            <Ionicons name="checkmark-circle-outline" size={64} color="#ffffff" />
           </LinearGradient>
         </Animated.View>
 
@@ -67,7 +67,7 @@ export function ArrivalScreen() {
             size="lg"
             style={styles.homeButton}
           >
-            <Ionicons name="home" size={20} color="#ffffff" style={{ marginRight: 8 }} />
+            <Ionicons name="home-outline" size={20} color="#ffffff" style={{ marginRight: 8 }} />
             Back to Home
           </GlowButton>
 

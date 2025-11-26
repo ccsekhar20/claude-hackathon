@@ -59,7 +59,7 @@ export function HomeScreen() {
 
         <View style={[styles.inputContainer, { marginTop: 16 }]}>
           <View style={[styles.iconCircle, { backgroundColor: 'rgba(59, 130, 246, 0.2)' }]}>
-            <Ionicons name="location" size={20} color={Colors.blueGradient[0]} />
+            <Ionicons name="location-outline" size={20} color={Colors.blueGradient[0]} />
           </View>
           <TextInput
             style={styles.input}

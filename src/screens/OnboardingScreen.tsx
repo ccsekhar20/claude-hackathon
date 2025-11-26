@@ -12,25 +12,25 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const screens = [
   {
-    icon: 'shield' as const,
+    icon: 'shield-outline' as const,
     title: 'Stay Safe at Night',
     description: 'AI-powered safety analysis of your walking routes with real-time hazard detection.',
     gradient: [Colors.safeGreen, '#14b8a6'],
   },
   {
-    icon: 'location' as const,
+    icon: 'location-outline' as const,
     title: 'Smart Route Planning',
     description: 'Compare multiple routes with detailed safety scores based on lighting, crime data, and crowd density.',
     gradient: [Colors.blueGradient[0], Colors.blueGradient[1]],
   },
   {
-    icon: 'people' as const,
+    icon: 'people-outline' as const,
     title: 'Virtual Companion',
     description: 'Share your live location with trusted contacts who can monitor your journey in real-time.',
     gradient: [Colors.purpleGradient[0], Colors.purpleGradient[1]],
   },
   {
-    icon: 'notifications' as const,
+    icon: 'notifications-outline' as const,
     title: 'Instant Alerts',
     description: 'Get notified about potential hazards, well-lit areas, and emergency services nearby.',
     gradient: [Colors.cautionYellow, Colors.dangerRed],

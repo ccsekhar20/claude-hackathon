@@ -78,7 +78,7 @@ export function ReportScreen() {
 
         <GlassCard style={styles.locationCard}>
           <View style={styles.locationHeader}>
-            <Ionicons name="location" size={20} color={Colors.blueGradient[0]} />
+            <Ionicons name="location-outline" size={20} color={Colors.blueGradient[0]} />
             <Text style={styles.locationTitle}>Location</Text>
           </View>
           <Text style={styles.locationText}>Near Campus Loop & Stevens Way</Text>

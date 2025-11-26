@@ -13,19 +13,19 @@ interface SafetyIndicatorProps {
 export function SafetyIndicator({ level, score, animated = true }: SafetyIndicatorProps) {
   const config = {
     safe: {
-      icon: 'shield' as const,
+      icon: 'shield-outline' as const,
       color: Colors.safeGreen,
       bgColor: 'rgba(52, 211, 153, 0.2)',
       label: 'Safe Route',
     },
     caution: {
-      icon: 'warning' as const,
+      icon: 'warning-outline' as const,
       color: Colors.cautionYellow,
       bgColor: 'rgba(251, 191, 36, 0.2)',
       label: 'Exercise Caution',
     },
     danger: {
-      icon: 'alert-circle' as const,
+      icon: 'alert-circle-outline' as const,
       color: Colors.dangerRed,
       bgColor: 'rgba(239, 68, 68, 0.2)',
       label: 'High Risk',

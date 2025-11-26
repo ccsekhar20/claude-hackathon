@@ -74,7 +74,7 @@ export function ActiveWalkScreen() {
         <GlassCard glow="safe" style={styles.progressCard}>
           <View style={styles.progressHeader}>
             <Animated.View style={[styles.navIcon, animatedStyle]}>
-              <Ionicons name="navigate" size={24} color={Colors.safeGreen} />
+              <Ionicons name="navigate-outline" size={24} color={Colors.safeGreen} />
             </Animated.View>
             <View style={styles.progressInfo}>
               <Text style={styles.routeName}>Campus Loop Route</Text>
@@ -98,7 +98,7 @@ export function ActiveWalkScreen() {
             <GlassCard glow="caution">
               <View style={styles.alertContent}>
                 <View style={styles.alertIcon}>
-                  <Ionicons name="warning" size={20} color={Colors.cautionYellow} />
+                    <Ionicons name="warning-outline" size={20} color={Colors.cautionYellow} />
                 </View>
                 <View style={styles.alertText}>
                   <Text style={styles.alertTitle}>Low Light Area Ahead</Text>
@@ -116,7 +116,7 @@ export function ActiveWalkScreen() {
 
         <GlassCard style={styles.companionsCard}>
           <View style={styles.companionsHeader}>
-            <Ionicons name="people" size={16} color={Colors.purpleGradient[0]} />
+            <Ionicons name="people-outline" size={16} color={Colors.purpleGradient[0]} />
             <Text style={styles.companionsTitle}>Live Companions</Text>
           </View>
           <View style={styles.companionsList}>
@@ -134,7 +134,7 @@ export function ActiveWalkScreen() {
 
         <View style={styles.quickActions}>
           <TouchableOpacity style={styles.actionButton}>
-            <Ionicons name="call" size={24} color={Colors.dangerRed} />
+            <Ionicons name="call-outline" size={24} color={Colors.dangerRed} />
             <Text style={styles.actionLabel}>Emergency</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton}>
@@ -142,7 +142,7 @@ export function ActiveWalkScreen() {
             <Text style={styles.actionLabel}>Message</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton}>
-            <Ionicons name="flashlight" size={24} color={Colors.cautionYellow} />
+            <Ionicons name="flashlight-outline" size={24} color={Colors.cautionYellow} />
             <Text style={styles.actionLabel}>Flashlight</Text>
           </TouchableOpacity>
         </View>
