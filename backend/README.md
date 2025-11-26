@@ -12,6 +12,7 @@ Backend service for SafeWalk AI - a safety-first navigation assistant for Univer
   - Time of day (daylight vs nighttime)
   - Route length
 - **Route Enrichment**: Enriches routes with safety metadata and explanations
+- **Real-time Support**: Flask-SocketIO for live companion mode and walk sessions
 
 ## Setup
 
@@ -67,10 +68,6 @@ Calculate the safest route between two coordinates.
   "end": {
     "lat": 47.6530,
     "lng": -122.3045
-  },
-  "preferences": {
-    "avoid_highways": false,
-    "walking_speed": "normal"
   }
 }
 ```
@@ -78,20 +75,21 @@ Calculate the safest route between two coordinates.
 **Response:**
 ```json
 {
-  "safest_route": {
-    "route_id": "route_0",
-    "safety_score": 85,
-    "distance_meters": 1250,
-    "duration_seconds": 900,
+  "bestRoute": {
+    "safetyScore": 85,
+    "distanceMeters": 1250,
+    "etaMinutes": 15,
     "polyline": "encoded_polyline_string",
-    "waypoints": [...],
-    "safety_explanation": "...",
-    "safety_tags": ["well_lit", "callbox_nearby"],
-    "safety_factors": {...},
-    "callboxes_along_route": [...],
-    "active_alerts": []
+    "explanation": ["..."],
+    "tags": ["Good visibility", "Short route"]
   },
-  "alternative_routes": [...]
+  "allRoutes": [...],
+  "context": {
+    "weather": {
+      "visibility": 4800,
+      "condition": "Fog"
+    }
+  }
 }
 ```
 
@@ -102,10 +100,74 @@ Health check endpoint.
 **Response:**
 ```json
 {
-  "status": "ok",
-  "service": "safewalk-ai-backend"
+  "status": "ok"
 }
 ```
+
+### Walk Sessions (Real-time)
+
+#### Create a Walk Session
+
+- `POST /api/sessions` - Create a new walk session with Live Companion Mode and Auto-Notify Arrival support
+
+**Example:**
+```bash
+curl -X POST http://localhost:5001/api/sessions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userName": "Agastya",
+    "startLocation": {"lat": 47.655, "lng": -122.308},
+    "endLocation": {"lat": 47.658, "lng": -122.313},
+    "autoNotify": {
+      "enabled": true,
+      "contactName": "Mom",
+      "contactChannel": "sms",
+      "contactValue": "+12065551234"
+    },
+    "liveCompanionEnabled": true
+  }'
+```
+
+**Response:**
+```json
+{
+  "sessionId": "<uuid>",
+  "shareUrl": "https://placeholder-frontend-url/companion/<shareToken>"
+}
+```
+
+#### Get Session by Share Token (Companion View)
+
+- `GET /api/sessions/share/<share_token>` - Get session information for Live Companion Mode view
+
+**Example:**
+```bash
+curl http://localhost:5001/api/sessions/share/abc123def4
+```
+
+**Response:**
+```json
+{
+  "userName": "Agastya",
+  "status": "active",
+  "startLocation": {"lat": 47.655, "lng": -122.308},
+  "endLocation": {"lat": 47.658, "lng": -122.313},
+  "lastLocation": {"lat": 47.656, "lng": -122.310},
+  "eta": "11:42 PM"
+}
+```
+
+#### Update Location
+
+- `POST /api/sessions/<session_id>/location` - Update the current location for a walk session
+
+#### Trigger Panic/SOS
+
+- `POST /api/sessions/<session_id>/panic` - Trigger a panic/SOS event for a walk session
+
+#### Mark Arrival
+
+- `POST /api/sessions/<session_id>/arrive` - Mark a walk session as arrived and trigger Auto-Notify Arrival
 
 ## Project Structure
 
@@ -117,7 +179,7 @@ backend/
 │   │   └── safe_route.py    # /safe-route endpoint
 │   ├── services/
 │   │   ├── route_service.py      # Google Maps integration
-│   │   ├── weather_service.py    # OpenWeatherMap integration
+│   │   ├── weather_service.py    # WeatherAPI.com integration
 │   │   ├── uw_alerts_service.py  # UW Alerts scraping
 │   │   ├── callbox_service.py    # Emergency callbox data
 │   │   └── safety_scorer.py      # Safety scoring algorithm
@@ -143,6 +205,17 @@ Key variables:
 - `UW_ALERTS_ENABLED`: Set to `false` to use stub data
 - `UW_CALLBOXES_GEOJSON_URL` or `UW_CALLBOXES_GEOJSON_PATH`: For emergency callbox data
 
+## Real-time Support
+
+The backend uses Flask-SocketIO for real-time communication. Socket.IO events include:
+
+- `join_session` - Join a session room by session ID
+- `join_session_by_token` - Join a session room by share token
+- `location_update` - Emitted when location is updated
+- `inactivity_alert` - Emitted when user is inactive for 3+ minutes
+- `panic` - Emitted when panic/SOS is triggered
+- `arrived` - Emitted when user arrives at destination
+
 ## Development
 
 The backend uses Flask with a modular service architecture. Each service is responsible for a specific data source or calculation:
@@ -159,4 +232,3 @@ The backend uses Flask with a modular service architecture. Each service is resp
 - Emergency callbox data can be loaded from a URL or local GeoJSON file
 - Weather service falls back to stub data if the API key is not configured
 - All services include error handling and fallbacks for development
-
