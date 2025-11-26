@@ -1,6 +1,6 @@
-# SafeWalk AI - Mobile App
+# DawgWalk AI - Mobile App
 
-A React Native mobile app converted from the Next.js web application. SafeWalk AI helps University of Washington students walk safely at night with AI-powered route analysis, real-time hazard detection, and live companion tracking.
+A React Native mobile app converted from the Next.js web application. DawgWalk AI helps University of Washington students walk safely at night with AI-powered route analysis, real-time hazard detection, and live companion tracking.
 
 ## Features
 
