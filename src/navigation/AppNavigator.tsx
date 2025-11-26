@@ -8,6 +8,8 @@ import { ActiveWalkScreen } from '../screens/ActiveWalkScreen';
 import { ArrivalScreen } from '../screens/ArrivalScreen';
 import { ReportScreen } from '../screens/ReportScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { StartWalkScreen } from '../screens/StartWalkScreen';
+import { CompanionScreen } from '../screens/CompanionScreen';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -17,6 +19,8 @@ export type RootStackParamList = {
   Arrival: undefined;
   Report: undefined;
   Settings: undefined;
+  StartWalk: undefined;
+  Companion: { shareToken: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -38,6 +42,8 @@ export function AppNavigator() {
         <Stack.Screen name="Arrival" component={ArrivalScreen} />
         <Stack.Screen name="Report" component={ReportScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="StartWalk" component={StartWalkScreen} />
+        <Stack.Screen name="Companion" component={CompanionScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
